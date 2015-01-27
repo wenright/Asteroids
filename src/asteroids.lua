@@ -36,6 +36,16 @@ function add_asteroid(x, y, radius)
 	table.insert(asteroids, t)
 end
 
+function remove_asteroid(index)
+	if asteroids[index].radius > 15 then
+		add_asteroid(asteroids[index].x, asteroids[index].y, asteroids[index].radius / 2)
+		add_asteroid(asteroids[index].x, asteroids[index].y, asteroids[index].radius / 2)
+	end
+	score = score + 20 * (math.floor(50 / asteroids[index].radius))
+	add_particle_system(asteroids[index].x, asteroids[index].y)
+	table.remove(asteroids, index)
+end
+
 function update_asteroids(dt)
 	for i=#asteroids, 1, -1 do
 		local x_bound = asteroids[i].x

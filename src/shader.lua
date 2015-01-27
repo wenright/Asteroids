@@ -3,7 +3,7 @@ function load_shaders ()
 	or not love.graphics.isSupported
 	or not love.graphics.isSupported("shader")
 	or not love.graphics.isSupported("canvas") then
-		print("Your graphics card does not support shaders")
+		print("Your graphics card does not support shaders :(")
 		return
 	end
 

@@ -12,6 +12,7 @@ end
 function add_laser(t)
 	t.x = t.x + math.cos(t.rotation - math.pi / 2) * 25
 	t.y = t.y + math.sin(t.rotation - math.pi / 2) * 25
+	t.lifetime = 1
 	table.insert(lasers, t)
 end
 
@@ -19,19 +20,12 @@ function update_lasers(dt, asteroids)
 	local lasers_to_be_removed = {}
 
 	for i=#lasers,1,-1 do
-		lasers[i].x = lasers[i].x + lasers[i].vx * speed * dt
-		lasers[i].y = lasers[i].y + lasers[i].vy * speed * dt
+		lasers[i].x = lasers[i].x + lasers[i].dirx * speed * dt
+		lasers[i].y = lasers[i].y + lasers[i].diry * speed * dt
 
-		--Check for collision with asteroid
 		for j=#asteroids,1,-1 do
 			if math.abs(asteroids[j].x - lasers[i].x) < asteroids[j].radius and math.abs(asteroids[j].y - lasers[i].y) < asteroids[j].radius then
-				if asteroids[j].radius > 15 then
-					add_asteroid(asteroids[j].x, asteroids[j].y, asteroids[j].radius / 2)
-					add_asteroid(asteroids[j].x, asteroids[j].y, asteroids[j].radius / 2)
-				end
-				score = score + 20
-				add_particle_system(asteroids[j].x, asteroids[j].y)
-				table.remove(asteroids, j)
+				remove_asteroid(j)
 				table.insert(lasers_to_be_removed, i)
 				print("asteroid["..j.."] removed, hit by laser["..i.."]")
 			end
@@ -41,8 +35,19 @@ function update_lasers(dt, asteroids)
 			level_cleared()
 		end
 
-		--Remove laser if it leaves the screen. Could have it wrap like ship/asteroid
-		if lasers[i].x < 0 or lasers[i].x > love.graphics.getWidth() or lasers[i].y < 0 or lasers[i].y > love.graphics.getHeight() then
+		if lasers[i].x < 0 then
+			lasers[i].x = love.graphics.getWidth()
+		elseif lasers[i].x > love.graphics.getWidth() then
+			lasers[i].x = 0
+		end
+		if lasers[i].y < 0 then
+			lasers[i].y = love.graphics.getHeight()
+		elseif lasers[i].y > love.graphics.getHeight() then
+			lasers[i].y = 0
+		end
+
+		lasers[i].lifetime = lasers[i].lifetime - dt
+		if lasers[i].lifetime <= 0 then 
 			table.insert(lasers_to_be_removed, i)
 		end
 	end

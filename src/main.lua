@@ -65,12 +65,6 @@ function love.keyreleased(key)
 	end
 end
 
-function love.keypressed(key)
-	if key == ' ' then
-		add_laser(get_player_attr())
-	end
-end
-
 function level_cleared ()
 	load_asteroids()
 end
