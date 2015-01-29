@@ -6,6 +6,13 @@ local speed
 function load_asteroids ()
 	speed = 1
 
+	if #asteroids > 0 then
+		for i=#asteroids,1,-1 do
+			remove_asteroid(i)
+		end
+		score = 0
+	end
+
 	local num_asteroids = 5
 	for i=1,num_asteroids do
 		local r = 100 * (math.random() + 0.5)
@@ -21,16 +28,24 @@ function add_asteroid(x, y, radius)
 	t.vx = math.random(-100, 100)
 	t.vy = math.random(-100, 100)
 	t.rotation = 0
-	t.torque = math.random(-1.5, 1.5)
+	if math.random() > 0.5 then
+		t.torque = math.random() * math.pi / 3
+	else
+		t.torque = math.random() * -math.pi / 3
+	end
 	t.radius = radius
 	t.max_radius = t.radius * 1.5
 	t.verts = {}
+	t.temp_verts = {}
 	local num_verts = 20
 	for i=1,num_verts, 2 do
 		local r = t.radius * (math.random() + 0.5)
 		local rot = i * math.pi / 10
 		t.verts[i] = math.cos(rot) * r
 		t.verts[i + 1] = math.sin(rot) * r
+
+		t.temp_verts[i] = t.verts[i]
+		t.temp_verts[i + 1] = t.verts[i + 1]
 	end
 
 	table.insert(asteroids, t)
@@ -66,27 +81,32 @@ function update_asteroids(dt)
 		elseif asteroids[i].y - asteroids[i].radius > love.window.getHeight() then
 			asteroids[i].y = -asteroids[i].radius
 		end
+
+		asteroids[i].rotation = asteroids[i].rotation + asteroids[i].torque * dt
+		local cos = math.cos(asteroids[i].rotation)
+		local sin = math.sin(asteroids[i].rotation)
+
+		for j=1,#asteroids[i].verts do
+			if j % 2 ~= 0 then
+				asteroids[i].temp_verts[j] = asteroids[i].verts[j] * cos - asteroids[i].verts[j + 1] * sin
+			else
+				asteroids[i].temp_verts[j] = asteroids[i].verts[j - 1] * sin + asteroids[i].verts[j] * cos
+			end
+		end
+
+		for j=1,#asteroids[i].verts do
+			if j % 2 ~= 0 then
+				asteroids[i].temp_verts[j] = asteroids[i].x + asteroids[i].temp_verts[j]
+			else
+				asteroids[i].temp_verts[j] = asteroids[i].y + asteroids[i].temp_verts[j]
+			end
+		end
 	end
 end
 
 function draw_asteroids()
 	for i=1,#asteroids do
-		local v = {}
-
-		for j=1,#asteroids[i].verts do
-			if j % 2 ~= 0 then
-				v[j] = asteroids[i].x + asteroids[i].verts[j]
-			else
-				v[j] = asteroids[i].y + asteroids[i].verts[j]
-			end
-		end
-
-		love.graphics.push()
-		love.graphics.translate(asteroids[i].x, asteroids[i].y)
-		love.graphics.rotate(t * asteroids[i].torque)
-		love.graphics.translate(-asteroids[i].x, -asteroids[i].y)
-		love.graphics.polygon('line', v)
-		love.graphics.pop()
+		love.graphics.polygon('line', asteroids[i].temp_verts)
 	end
 end
 

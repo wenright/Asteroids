@@ -24,7 +24,7 @@ function update_lasers(dt, asteroids)
 		lasers[i].y = lasers[i].y + lasers[i].diry * speed * dt
 
 		for j=#asteroids,1,-1 do
-			if math.abs(asteroids[j].x - lasers[i].x) < asteroids[j].radius and math.abs(asteroids[j].y - lasers[i].y) < asteroids[j].radius then
+			if is_point_in_polygon({lasers[i].x, lasers[i].y}, asteroids[j].temp_verts) then
 				remove_asteroid(j)
 				table.insert(lasers_to_be_removed, i)
 				print("asteroid["..j.."] removed, hit by laser["..i.."]")
@@ -58,6 +58,7 @@ function update_lasers(dt, asteroids)
 end
 
 function draw_lasers()
+	love.graphics.setPointSize(3)
 	for i=#lasers,1,-1 do
 		love.graphics.point(lasers[i].x, lasers[i].y)
 	end

@@ -8,11 +8,9 @@ function load_shaders ()
 	end
 
 	canvas = love.graphics.newCanvas()
-	blurred_canvas_scale = 1
-	blurred_canvas = love.graphics.newCanvas(love.graphics.getWidth() / blurred_canvas_scale, love.graphics.getHeight() / blurred_canvas_scale)
+	blurred_canvas = love.graphics.newCanvas()
 
 	love.graphics.setPointStyle('smooth')
-	love.graphics.setPointSize(3)
 	love.graphics.setLineStyle('smooth')
 	love.graphics.setLineWidth(1)
 	love.graphics.setColor(245, 239, 227)
@@ -25,5 +23,17 @@ function load_shaders ()
 
 	blur:send('width', love.graphics.getWidth())
 	blur:send('height', love.graphics.getHeight())
-	blur:send('radius', 3)
+	blur:send('radius', 4.5)
+end
+
+function apply_shaders ()
+	--Post-processing
+	love.graphics.setBlendMode('premultiplied')
+	love.graphics.setCanvas(blurred_canvas)
+	love.graphics.setShader(blur)
+	love.graphics.draw(canvas, 0, 0)
+	love.graphics.setShader()
+	love.graphics.setCanvas()
+	love.graphics.draw(canvas, 0, 0)
+	love.graphics.draw(blurred_canvas, 0, 0)
 end

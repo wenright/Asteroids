@@ -1,6 +1,6 @@
 local particle_systems = {}
-local num_particles = 15
-local particle_speed = 0.08
+local num_particles = 10
+local particle_speed = 0.05
 
 function load_particles ()
 	

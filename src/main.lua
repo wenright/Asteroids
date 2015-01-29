@@ -2,14 +2,16 @@ require 'player'
 require 'lasers'
 require 'asteroids'
 require 'particles'
+require 'starfield'
+require 'collision'
 require 'shader'
 
 function love.load()
 	min_dt = 1/90
 	next_time = love.timer.getTime()
 	t = 0
-
 	score = 0
+	game_is_over = false
 
 	math.randomseed(os.time())
 
@@ -17,6 +19,7 @@ function love.load()
 	load_lasers()
 	load_asteroids()
 	load_particles()
+	load_starfield()
 	load_shaders()
 end
 
@@ -40,16 +43,9 @@ function love.draw()
 	draw_player()
 	draw_asteroids()
 	draw_particles()
+	draw_starfield()
 
-	--Post-processing
-	love.graphics.setBlendMode('premultiplied')
-	love.graphics.setCanvas(blurred_canvas)
-	love.graphics.setShader(blur)
-	love.graphics.draw(canvas, 0, 0, 0, 1 / blurred_canvas_scale, 1 / blurred_canvas_scale)
-	love.graphics.setShader()
-	love.graphics.setCanvas()
-	love.graphics.draw(canvas, 0, 0)
-	love.graphics.draw(blurred_canvas, 0, 0, 0, blurred_canvas_scale, blurred_canvas_scale)
+	apply_shaders()
 
 	local cur_time = love.timer.getTime()
 	if next_time <= cur_time then
@@ -62,6 +58,8 @@ end
 function love.keyreleased(key)
 	if key == 'escape' then
 		love.event.quit()
+	elseif key == 'r' and game_is_over then
+		love.load()
 	end
 end
 
@@ -70,5 +68,6 @@ function level_cleared ()
 end
 
 function game_over ()
-
+	print("Game Over!")
+	game_is_over = true
 end
